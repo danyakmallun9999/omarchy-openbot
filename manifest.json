@@ -17,7 +17,7 @@
     "category": "AI",
     "aliases": ["openbot", "agents", "activity"],
     "allowMultiple": false,
-    "defaultSection": "centerBegin",
+    "defaultSection": "left",
     "defaults": {
       "refreshIntervalSec": 3,
       "doneFlashSec": 14,

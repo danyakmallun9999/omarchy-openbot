@@ -3,9 +3,10 @@
 A live OpenBot activity indicator for the Omarchy bar. It reads the local OpenBot
 SQLite projection read-only, so it never changes agent state.
 
-The indicator sits next to the clock (`centerBegin`) as plain bar text: no capsule,
-no border. It stays compact while idle and lights up with live animation when an
-agent is working.
+The indicator is a plain bar item with no capsule or border. It stays compact
+while idle and lights up with live animation when an agent is working. It is
+placed in the bar's `left` section by default; to sit beside the clock instead,
+move it with `omarchy bar move danyakmallun.openbot --section centerBegin`.
 
 ## What It Shows
 
@@ -36,10 +37,11 @@ Questions always take top visual priority.
 omarchy plugin add https://github.com/danyakmallun9999/omarchy-openbot.git --enable --yes
 ```
 
-The widget is placed in `centerBegin`, just left of the clock. To move it elsewhere:
+The widget lands in the bar's `left` section by default. To put it beside the
+clock:
 
 ```bash
-omarchy bar move danyakmallun.openbot --section right
+omarchy bar move danyakmallun.openbot --section centerBegin
 ```
 
 To remove it:
