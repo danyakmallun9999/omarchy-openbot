@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "danyakmallun.openbot",
+  "name": "OpenBot Activity",
+  "version": "1.0.0",
+  "author": "danyakmallun",
+  "license": "MIT",
+  "description": "Live OpenBot agent activity in the Omarchy bar: a pill that shows which agent is working, how long it has been going, and when one is waiting on you, plus a panel with the current step, pending questions, and the turns that just finished.",
+  "kinds": ["bar-widget"],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "OpenBot Activity",
+    "description": "Working, waiting, and asking states for every OpenBot agent, read live from the local OpenBot database.",
+    "category": "AI",
+    "aliases": ["openbot", "agents", "activity"],
+    "allowMultiple": false,
+    "defaultSection": "centerBegin",
+    "defaults": {
+      "refreshIntervalSec": 3,
+      "doneFlashSec": 14,
+      "stalledAfterSec": 240
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalSec",
+        "type": "integer",
+        "label": "Idle refresh interval (seconds)",
+        "min": 1,
+        "max": 60,
+        "step": 1,
+        "defaultValue": 3,
+        "description": "How often the bar reads OpenBot while idle. While an agent is working it always reads once a second."
+      },
+      {
+        "key": "doneFlashSec",
+        "type": "integer",
+        "label": "Finished flash (seconds)",
+        "min": 4,
+        "max": 300,
+        "step": 1,
+        "defaultValue": 14,
+        "description": "How long the pill keeps showing a check after a turn ends."
+      },
+      {
+        "key": "stalledAfterSec",
+        "type": "integer",
+        "label": "Silent-turn warning (seconds)",
+        "min": 60,
+        "max": 3600,
+        "step": 30,
+        "defaultValue": 240,
+        "description": "A running turn with no new step for this long is shown as silent instead of working."
+      }
+    ]
+  }
+}
