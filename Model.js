@@ -277,18 +277,18 @@ function tooltipLines(snapshot, stalledAfterSec) {
   var recent = asArray(s.recent)
 
   if (!s.ok) {
-    lines.push("OpenBot · Aplikasi belum berjalan")
-    lines.push("Klik untuk membuka OpenBot")
+    lines.push("OpenBot · Not running")
+    lines.push("Click to launch OpenBot")
     return lines
   }
 
-  // 1. High priority: Question / needs confirmation
+  // 1. High priority: question / needs confirmation
   if (questions.length > 0) {
     var q0 = questions[0]
-    var qCount = questions.length > 1 ? " (" + questions.length + " pertanyaan)" : ""
-    lines.push("Perlu konfirmasi: " + q0.name + qCount + " · " + q0.ageText)
+    var qCount = questions.length > 1 ? " (" + questions.length + " questions)" : ""
+    lines.push("Needs your input: " + q0.name + qCount + " · " + q0.ageText)
     if (q0.shortText) lines.push("\"" + plain(q0.shortText, 90) + "\"")
-    lines.push("Klik: buka panel konfirmasi · Klik kanan: refresh")
+    lines.push("Click: open questions · Right click: refresh")
     return lines
   }
 
@@ -296,41 +296,41 @@ function tooltipLines(snapshot, stalledAfterSec) {
   if (agents.length > 0) {
     var a0 = agents[0]
     if (agents.length === 1) {
-      var stateLabel = a0.stalled ? "silent " + a0.quietText : "aktif " + a0.elapsedText
+      var stateLabel = a0.stalled ? "silent " + a0.quietText : "active " + a0.elapsedText
       lines.push("OpenBot · " + a0.name + " (" + stateLabel + ")")
       if (a0.activity) lines.push(plain(a0.activity, 95))
       else if (a0.modelShort) lines.push("Model: " + a0.modelShort + " · " + a0.steps + " steps")
     } else {
-      lines.push("OpenBot · " + agents.length + " agen aktif (" + a0.name + " +" + (agents.length - 1) + ")")
+      lines.push("OpenBot · " + agents.length + " agents active (" + a0.name + " +" + (agents.length - 1) + ")")
       var act = a0.activity ? ": " + plain(a0.activity, 70) : ""
       lines.push(a0.name + " (" + a0.elapsedText + ")" + act)
     }
-    lines.push("Klik: buka panel · Klik kanan: refresh")
+    lines.push("Click: open panel · Right click: refresh")
     return lines
   }
 
   // 3. Waiting agents
   if (waits.length > 0) {
     var w0 = waits[0]
-    var wCount = waits.length > 1 ? " (" + waits.length + " agen)" : ""
-    lines.push("OpenBot · Menunggu" + wCount)
-    lines.push(w0.name + ": " + (w0.note ? w0.note : "menunggu rekan agen"))
-    lines.push("Klik: buka panel · Klik kanan: refresh")
+    var wCount = waits.length > 1 ? " (" + waits.length + " agents)" : ""
+    lines.push("OpenBot · Waiting" + wCount)
+    lines.push(w0.name + ": " + (w0.note ? w0.note : "on a teammate"))
+    lines.push("Click: open panel · Right click: refresh")
     return lines
   }
 
   // 4. Recently finished turn (within doneFlash window)
   if (recent.length > 0 && num(recent[0].age, 999) <= 15) {
     var r0 = recent[0]
-    var outcome = r0.failed ? "gagal" : "selesai"
+    var outcome = r0.failed ? "failed" : "finished"
     lines.push("OpenBot · " + r0.name + " " + outcome + " (" + r0.ageText + ")")
-    lines.push("Klik: buka panel · Klik kanan: refresh")
+    lines.push("Click: open panel · Right click: refresh")
     return lines
   }
 
   // 5. Standby / Idle
-  lines.push("OpenBot · Standby (tidak ada agen aktif)")
-  lines.push("Klik: buka panel · Klik kanan: refresh")
+  lines.push("OpenBot · Standby (no active agents)")
+  lines.push("Click: open panel · Right click: refresh")
   return lines
 }
 

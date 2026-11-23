@@ -1,41 +1,95 @@
-# OpenBot Activity — Omarchy shell plugin
+# OpenBot Activity — Omarchy Shell Plugin
 
-A live activity indicator for OpenBot in the Omarchy bar. It reads the local OpenBot
-SQLite projection read-only, so it never alters agent state.
+A live OpenBot activity indicator for the Omarchy bar. It reads the local OpenBot
+SQLite projection read-only, so it never changes agent state.
 
-The indicator sits just left of the clock (`centerBegin`) as plain bar text:
-no capsule, no border. It is compact and quiet when idle, and expands with live
-animation only while an agent is active:
+The indicator sits next to the clock (`centerBegin`) as plain bar text: no capsule,
+no border. It stays compact while idle and lights up with live animation when an
+agent is working.
 
-| State | Bar (Horizontal) | Bar (Vertical) | Panel |
+## What It Shows
+
+| State | Bar (horizontal) | Bar (vertical) | Panel |
 | --- | --- | --- | --- |
-| Idle / Standby | OpenBot robot badge `󰚩` | Square slot `󰚩` | "Idle — no agent is working" |
-| App Closed | Dimmed robot badge | Dimmed square slot | "Aplikasi belum berjalan" |
-| Working (1 agent) | Spinning `󰑐` + glistening name + elapsed time | Rotating `󰑐` | Agent PlushBot avatar badge, model, steps, current step text |
-| Working (>1 agents) | Spinning `󰑐` + primary name `+N` + elapsed time | Rotating `󰑐` + dot badge | Full list of active agents with individual status |
+| Idle / standby | Robot glyph `󰚩` | Square slot `󰚩` | "Idle — no agent is working" |
+| OpenBot not running | Dimmed robot glyph | Dimmed square slot | "OpenBot is not running" |
+| Working (one agent) | Spinning `󰑐` + shimmering name + elapsed time | Rotating `󰑐` | PlushBot avatar, model, steps, current step |
+| Working (several agents) | Spinning `󰑐` + primary name `+N` + elapsed time | Rotating `󰑐` + dot badge | One row per agent with individual status |
 | Silent turn | `󰔟` + name + "silent <time>" | `󰔟` | Marked silent with quiet duration |
 | Question (`ask_user`) | Pulsing `󰘥` + bold name + "needs you" | Pulsing `󰘥` | Question card with prompt text and age |
-| Waiting on teammate | Clock `󰥔` + name + "waiting" | Clock `󰥔` | Wait card with dependency note |
+| Waiting on a teammate | Clock `󰥔` + name + "waiting" | Clock `󰥔` | Wait card with dependency note |
 | Just finished | Check `󰗠` + name + "done" (14s flash) | Check `󰗠` | "Just finished" row with duration |
 
 Questions always take top visual priority.
 
-## Multi-Agent & Vertical Bar Behavior
+## Requirements
 
-- **Multi-Agent (Horizontal):** When 2+ agents run concurrently, the bar displays the most recently updated agent with `+N` (e.g. `󰑐  Omarch +1  45s`), preventing bar clutter. The panel lists every agent in full detail.
-- **Vertical Bar:** Automatically adapts when the bar is positioned on the screen edge (`left` / `right`). Disables wide horizontal text labels and collapses to a clean single square slot with the animated glyph, plus an indicator dot when multiple agents are running.
-- **Hover Tooltip:** Provides a contextual 1–3 line summary showing the active agent's current step, age, and quick interaction hints.
+- Omarchy with the Quickshell-based shell (`omarchy-shell`).
+- OpenBot desktop app installed and running at least once, so its database exists:
+  `$XDG_CONFIG_HOME/OpenBot/openbot.db` (default `~/.config/OpenBot/openbot.db`).
+- `sqlite3` command line tool.
+- A Nerd Font for the status glyphs.
+
+## Install
+
+```bash
+omarchy plugin add https://github.com/danyakmallun9999/omarchy-openbot.git --enable --yes
+```
+
+The widget is placed in `centerBegin`, just left of the clock. To move it elsewhere:
+
+```bash
+omarchy bar move danyakmallun.openbot --section right
+```
+
+To remove it:
+
+```bash
+omarchy plugin remove danyakmallun.openbot --yes
+```
+
+## Configuration
+
+Settings live on the widget in `~/.config/omarchy/shell.json` and can be changed with
+`omarchy bar set`:
+
+```bash
+omarchy bar set danyakmallun.openbot refreshIntervalSec 5
+```
+
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `refreshIntervalSec` | `3` | Database read interval while idle (1s while an agent is active). |
+| `doneFlashSec` | `14` | How long a finished turn keeps showing a check. |
+| `stalledAfterSec` | `240` | A turn with no new step for this long is shown as silent. |
+
+The database location can be overridden with the `OPENBOT_DB` environment variable,
+useful for custom OpenBot installs.
+
+## Behavior
+
+- **Multi-agent (horizontal):** when 2+ agents run concurrently, the bar shows the
+  primary agent with `+N` (for example `󰑐  Omarch +1  45s`) to avoid clutter. The
+  panel lists every agent in full detail.
+- **Vertical bar:** automatically collapses to a single square slot with the animated
+  glyph, plus a dot when several agents are running.
+- **Hover tooltip:** a contextual 1–3 line summary with the active step, age, and
+  interaction hints.
+- **Avatars:** each agent is drawn with its OpenBot hue and bot eyes, or its uploaded
+  avatar image when one is set.
 
 ## Shortcuts & Controls
 
-- **`Super + Shift + O`** or **`Super + Shift + A`**: Toggle the OpenBot bar panel (registered in Hyprland).
-- **Left click**: Open / close the panel.
-- **Right click / Middle click**: Force an immediate database re-read.
-- **Keyboard navigation inside panel**:
-  - `Esc`: Close panel.
-  - `Enter` / `o`: Bring the OpenBot window forward (`gtk-launch openbot`).
-  - `r`: Refresh state.
-  - `Tab`: Switch to neighboring bar panel.
+- **Left click**: open / close the panel.
+- **Right click / Middle click**: force an immediate database re-read.
+- **Inside the panel**: `Esc` closes, `Enter` / `o` brings OpenBot forward, `r` refreshes,
+  `Tab` switches to a neighbouring bar panel.
+
+To get a keyboard shortcut, add a Hyprland binding in `~/.config/hypr/bindings.lua`:
+
+```lua
+o.bind("SUPER + SHIFT + O", "OpenBot Activity", "omarchy-shell danyakmallun.openbot.ui toggle")
+```
 
 ## IPC
 
@@ -47,16 +101,25 @@ omarchy-shell danyakmallun.openbot.ui refresh
 omarchy-shell danyakmallun.openbot.ui status
 ```
 
-`status` outputs JSON: `{"phase": "working", "running": 1, "questions": 0, "waits": 0, "readAt": 1795463473335}`.
+`status` prints JSON, for example:
+`{"phase":"working","running":1,"questions":0,"waits":0,"readAt":1795463473335}`.
 
-## Layout & Architecture
+## Layout
 
 ```
-AgentAvatar.qml    Native plush bot avatar: procedural squircle with bot eyes & signature hue, or custom avatar image
-BarWidget.qml      WidgetButton container: icon animation, glistening text, vertical adaptation, click routing
-OpenBotPoller.qml   Adaptive SQLite poller (1s active, 3s idle), snapshot caching, monotonic second clock
-Panel.qml          KeyboardPanel: hero, NEEDS YOU cards, WORKING rows, WAITING, JUST FINISHED, OpenBot action
-Model.js           Parsers, formatting, glyphs, and contextual tooltip generator
-scripts/state.sh   Read-only SQLite query with busy timeout; outputs structured JSON
-assets/            OpenBot mark icon
+manifest.json       Plugin metadata, entry point, and settings schema
+BarWidget.qml       WidgetButton container: icon animation, shimmer, vertical mode, click routing
+Panel.qml           KeyboardPanel: hero, NEEDS YOU cards, WORKING rows, WAITING, JUST FINISHED
+OpenBotPoller.qml   Adaptive SQLite poller (1s active / configurable idle), snapshot cache, live clock
+AgentAvatar.qml     Procedural PlushBot avatar or custom image
+Model.js            Parsers, formatters, glyphs, and tooltip text
+scripts/state.sh    Read-only SQLite snapshot; prints structured JSON
+assets/             OpenBot mark
 ```
+
+All dynamic text is rendered as plain text, so wording coming from an agent is never
+interpreted as markup. Database access is read-only (`sqlite3 -readonly`).
+
+## License
+
+MIT
